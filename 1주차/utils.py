@@ -21,7 +21,7 @@ class Grader():
 
     def _correct_00(self, answer):
         answer = answer()
-        if (answer == np.eye(5)).all():
+        if np.mean(answer == np.eye(5)) == 1:
             print('정답')
         else:
             print('오답')
