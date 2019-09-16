@@ -2,7 +2,6 @@ import numpy as np
 import sys
 sys.path.append('..')
 
-
 class Grader():
     def __init__(self):
         self.part_names = ['Warm up exercise',
