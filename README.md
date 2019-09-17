@@ -9,5 +9,3 @@
 * Andrew Ng, Machine Learning, coursera, [link](<https://www.coursera.org/learn/machine-learning>)
 * dibgerge, ml-coursera-python-assignments, github, [link](<https://github.com/dibgerge/ml-coursera-python-assignments>)
 * kaleko, CourseraML, github, [link](<https://github.com/kaleko/CourseraML>)
-
-test
