@@ -26,7 +26,7 @@ def check_answer(args, real, pred):
     else:
         real_value = change_value_type(real(**args))
         pred_value = change_value_type(pred(**args))
-    true_or_false = np.array([np.array(real_value[i] - pred_value[i]).mean() < 1e-9 for i in range(len(real_value))]).all()
+    true_or_false = np.array([(real_value[i] - pred_value[i]).mean() < 1e-9 for i in range(len(real_value))]).all()
     return true_or_false
 
 
@@ -38,6 +38,7 @@ def message(true_or_false):
 
 def change_value_type(value):
     if type(value) == tuple:
+        value = [np.array(i) for i in value]
         return value
     else:
-        return [value]
+        return np.array([value])
