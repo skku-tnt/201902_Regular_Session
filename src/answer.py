@@ -183,9 +183,10 @@ class linearRegCostFunction:
     'lambda_' : 0.5
     }
     def test(X, y, theta, lambda_):
+        m = y.size
         grad = np.zeros(theta.shape)
         hyp = np.dot(X, theta)
-        J = (sum(np.square(hyp - y)) + (lambda_ * sum(np.square(theta[1:])))) / (2 * m)    
+        J = (sum(np.square(hyp - y)) + (lambda_ * sum(np.square(theta[1:])))) / (2 * m)
         grad[0] = sum((hyp - y) * X[:, 0]) / m
         grad[1:] = (np.dot(X[:, 1:].T, (hyp-y)) / m) + (lambda_ * theta[1:] / m)
         return J, grad
