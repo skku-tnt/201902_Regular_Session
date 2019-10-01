@@ -184,18 +184,15 @@ class linearRegCostFunction:
     }
     def test(X, y, theta, lambda_):
         grad = np.zeros(theta.shape)
-        hypothesis = np.matmul(X, theta)
-        J = np.mean((hypothesis - y)**2) * 0.5 + (lambda_ / (2 * len(X))) * np.dot(theta[1:], theta[1:])
-        for i in range(len(theta)):
-            if i == 0:
-                grad[i] = np.mean((hypothesis - y) * X[:,i])
-            else:
-                grad[i] = np.mean((hypothesis - y) * X[:,i]) + (lambda_ / len(X)) * theta[i]
+        hyp = np.dot(X, theta)
+        J = (sum(np.square(hyp - y)) + (lambda_ * sum(np.square(theta[1:])))) / (2 * m)    
+        grad[0] = sum((hyp - y) * X[:, 0]) / m
+        grad[1:] = (np.dot(X[:, 1:].T, (hyp-y)) / m) + (lambda_ * theta[1:] / m)
         return J, grad
 
 def trainLinearReg(linearRegCostFunction, X, y, lambda_=0.0, maxiter=200):
     initial_theta = np.zeros(X.shape[1])
-    costFunction = lambda t: linearRegCostFunction(X, y, t, lambda_)
+    costFunction = lambda t: linearRegCostFunction.test(X, y, t, lambda_)
     options = {'maxiter': maxiter}
     res = optimize.minimize(costFunction, initial_theta, jac=True, method='TNC', options=options)
     return res.x
