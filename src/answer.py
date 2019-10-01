@@ -193,7 +193,7 @@ class linearRegCostFunction:
 
 def trainLinearReg(linearRegCostFunction, X, y, lambda_=0.0, maxiter=200):
     initial_theta = np.zeros(X.shape[1])
-    costFunction = lambda t: linearRegCostFunction.test(X, y, t, lambda_)
+    costFunction = lambda t: linearRegCostFunction(X, y, t, lambda_)
     options = {'maxiter': maxiter}
     res = optimize.minimize(costFunction, initial_theta, jac=True, method='TNC', options=options)
     return res.x
