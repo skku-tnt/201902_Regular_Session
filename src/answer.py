@@ -461,12 +461,9 @@ def visualizeBoundary(X, y, model):
     pyplot.grid(False)
 
 class optimalResult:
-    args = {
-        'C' : 0.3,
-        'sigma' : 0.1
-    }
-    def test(C, sigma):
-        return C, sigma
+    args = None
+    def test():
+        return 0.3, 0.1
 
 # 함수 이름에 따라 정답을 가져오는 함수
 def get_answer(func_name):
