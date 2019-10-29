@@ -1,6 +1,10 @@
 import numpy as np
-from matplotlib import pyplot
 from scipy import optimize
+
+from matplotlib import pyplot
+import matplotlib as mpl
+from matplotlib.animation import FuncAnimation
+
 
 '''
 1주차
@@ -464,6 +468,164 @@ class optimalResult:
     args = None
     def test():
         return 0.3, 0.1
+
+'''
+6주차
+'''
+
+def displayData(X, example_width=None, figsize=(10, 10)):
+    # Compute rows, cols
+    if X.ndim == 2:
+        m, n = X.shape
+    elif X.ndim == 1:
+        n = X.size
+        m = 1
+        X = X[None]  # Promote to a 2 dimensional array
+    else:
+        raise IndexError('Input X should be 1 or 2 dimensional.')
+
+    example_width = example_width or int(np.round(np.sqrt(n)))
+    example_height = int(n / example_width)
+
+    # Compute number of items to display
+    display_rows = int(np.floor(np.sqrt(m)))
+    display_cols = int(np.ceil(m / display_rows))
+
+    fig, ax_array = pyplot.subplots(display_rows, display_cols, figsize=figsize)
+    fig.subplots_adjust(wspace=0.025, hspace=0.025)
+
+    ax_array = [ax_array] if m == 1 else ax_array.ravel()
+
+    for i, ax in enumerate(ax_array):
+        ax.imshow(X[i].reshape(example_height, example_width, order='F'), cmap='gray')
+        ax.axis('off')
+
+
+def featureNormalize(X):
+    mu = np.mean(X, axis=0)
+    X_norm = X - mu
+
+    sigma = np.std(X_norm, axis=0, ddof=1)
+    X_norm /= sigma
+    return X_norm, mu, sigma
+
+
+def plotProgresskMeans(i, X, centroid_history, idx_history):
+    K = centroid_history[0].shape[0]
+    pyplot.gcf().clf()
+    cmap = pyplot.cm.rainbow
+    norm = mpl.colors.Normalize(vmin=0, vmax=2)
+
+    for k in range(K):
+        current = np.stack([c[k, :] for c in centroid_history[:i+1]], axis=0)
+        pyplot.plot(current[:, 0], current[:, 1],
+                    '-Xk',
+                    mec='k',
+                    lw=2,
+                    ms=10,
+                    mfc=cmap(norm(k)),
+                    mew=2)
+
+        pyplot.scatter(X[:, 0], X[:, 1],
+                       c=idx_history[i],
+                       cmap=cmap,
+                       marker='o',
+                       s=8**2,
+                       linewidths=1,)
+    pyplot.grid(False)
+    pyplot.title('Iteration number %d' % (i+1))
+
+
+def runkMeans(X, centroids, findClosestCentroids, computeCentroids,
+              max_iters=10, plot_progress=False):
+    K = centroids.shape[0]
+    idx = None
+    idx_history = []
+    centroid_history = []
+
+    for i in range(max_iters):
+        idx = findClosestCentroids(X, centroids)
+
+        if plot_progress:
+            idx_history.append(idx)
+            centroid_history.append(centroids)
+
+        centroids = computeCentroids(X, idx, K)
+
+    if plot_progress:
+        fig = pyplot.figure()
+        anim = FuncAnimation(fig, plotProgresskMeans,
+                             frames=max_iters,
+                             interval=500,
+                             repeat_delay=2,
+                             fargs=(X, centroid_history, idx_history))
+        return centroids, idx, anim
+
+    return centroids, idx
+
+X = np.sin(np.arange(1, 166)).reshape(15, 11, order='F')
+Z = np.cos(np.arange(1, 122)).reshape(11, 11, order='F')
+C = Z[:5, :]
+idx = np.arange(1, 16) % 3
+
+class findClosestCentroids:
+    args = {
+    'X' : X,
+    'centroids' : C
+    }
+    def test(X, centroids):
+        K = centroids.shape[0]
+        idx = np.zeros(X.shape[0], dtype=int)
+        for i,j in enumerate(X):
+            distances = np.sum((centroids - j)**2, axis=1)
+            idx[i] = np.argmin(distances)
+        return idx
+
+
+class computeCentroids:
+    args = {
+    'X' : X,
+    'idx' : idx,
+    'K' : 3
+    }
+    def test(X, idx, K):
+        m, n = X.shape
+        centroids = np.zeros((K, n))
+        for i in range(K):
+            centroids[i] = np.mean(X[idx==i], axis=0)
+        return centroids
+
+class pca:
+    args = {
+    'X' : X
+    }
+    def test(X):
+        m, n = X.shape
+        Sigma = np.dot(X.T, X)
+        Sigma /= m
+        U, S, V = np.linalg.svd(Sigma)
+        return U, S
+
+class projectData:
+    args = {
+    'X' : X,
+    'U' : Z,
+    'K' : 5
+    }
+    def test(X, U, K):
+        Z = np.dot(X, U[:,:K])
+        return Z
+
+class recoverData:
+    args = {
+    'Z' : X[:, :5],
+    'U' : Z,
+    'K' : 5
+    }
+    def test(Z, U, K):
+        X_rec = np.dot(Z, U[:, :K].T)
+        return X_rec
+
 
 # 함수 이름에 따라 정답을 가져오는 함수
 def get_answer(func_name):
